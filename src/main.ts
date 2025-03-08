@@ -1,30 +1,30 @@
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
-import router from './router/index.js'; 
-import axios from 'axios';
+import router from './router/index.js'
+import axios from 'axios'
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faSearch, faFilter, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { API_BASE_URL } from './config.ts'
 
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+// Add FontAwesome icons in a single call
+library.add(faSearch, faFilter, faTimesCircle)
 
-// Adding FontAwesome icon to the library
-library.add(faSearch);
-library.add(faFilter);
+// Create app instance
+const app = createApp(App)
 
-const app = createApp(App);
+// Global component registrations
+app.component('font-awesome-icon', FontAwesomeIcon)
+app.component('PulseLoader', PulseLoader) // Still suggesting kebab-case for consistency
 
-// Registering FontAwesome component globally
-app.component('font-awesome-icon', FontAwesomeIcon);
+// Configure axios with base URL
+axios.defaults.baseURL = API_BASE_URL
+app.config.globalProperties.$axios = axios // Keeping your preferred $axios
 
-// Registering the PulseLoader component globally
-app.component('PulseLoader', PulseLoader); // Access PulseLoader as a property of VueSpinner
+// Use plugins
+app.use(router)
 
-// Using the router
-app.use(router);
-
-// Make axios globally available in the app
-app.config.globalProperties.$axios = axios;
-
-app.mount('#app');
+// Mount app
+app.mount('#app')

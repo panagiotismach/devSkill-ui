@@ -25,8 +25,8 @@
             <td>{{ repo.last_commit_date }}</td>
             <td>
               <!-- Show only the first 10 extensions -->
-              {{ repo.extensions.slice(0, 10).join(', ') }}
-              <span v-if="repo.extensions.length > 10">... <a href="#" @click.stop="showModal(repo)">See All</a></span>
+              {{ repo.extensions?.slice(0, 10).join(', ') }}
+              <span v-if="repo?.extensions?.length > 10">... <a href="#" @click.stop="showModal(repo)">See All</a></span>
             </td>
             <td>
               <button @click.stop="fetchContributors(repo)">View Details</button>
@@ -79,7 +79,7 @@ export default {
       this.modalVisible = true;
 
       try {
-        const response = await this.$axios.get(`http://localhost:8080/retrieveContributorsForRepository?repoId=${this.selectedRepo.id}`);
+        const response = await this.$axios.get(`/retrieveContributorsForRepository?repoId=${this.selectedRepo.id}`);
         this.selectedRepo.contributors = response.data.contributors;
       } catch (error) {
         console.error('Failed to fetch contributors:', error);

@@ -8,7 +8,8 @@
             <th>Name</th>
             <th>Github Username</th>
             <th>Email</th>
-            <th>Actions</th>
+            <th>Repositories</th>
+            <th>Contributions</th>
           </tr>
         </thead>
         <tbody>
@@ -22,7 +23,10 @@
             <td>{{ contributor.githubUsername }}</td>
             <td>{{ contributor.email }}</td>
             <td>
-              <button @click.stop="showModal(contributor)">View Details</button>
+              <button @click.stop="showModal(contributor, 'repositories')">View Details</button>
+            </td>
+            <td>
+              <button @click.stop="showModal(contributor, 'contributions')">View Details</button>
             </td>
           </tr>
         </tbody>
@@ -36,15 +40,44 @@
       <button :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">Next</button>
     </div>
 
-    <!-- Modal for showing all repositories -->
+    <!-- Modal for showing details -->
     <div v-if="modalVisible" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
-        <h2>All Repositories</h2>
-        
-        <ul v-if="selectedContributor && selectedContributor.repositories && selectedContributor.repositories.length > 0">
-          <li v-for="repository in selectedContributor.repositories" :key="repository.repoName">{{ repository.repoName }}</li>
-        </ul>
-        <p v-else>Can not find any Repositories</p>
+        <div v-if="type == 'repositories'">
+          <h2>All Repositories</h2>
+          <ul v-if="selectedContributor?.repositories?.length">
+            <li v-for="repository in selectedContributor.repositories" :key="repository.repoName">
+              {{ repository.repoName }}
+            </li>
+          </ul>
+          <p v-else>No repositories found.</p>
+        </div>
+        <div v-else>
+          <h2>Contributions ({{ selectedContributor?.contributions.length }})</h2>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Extensions</th>
+                  <th>Insertions</th>
+                  <th>Deletions</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(contribution, index) in selectedContributor?.contributions || []" :key="index">
+                  <td>{{ selectedContributor.email }}</td>
+                  <td>{{ contribution[0] }}</td>
+                  <td>{{ contribution[1] }}</td>
+                  <td>{{ contribution[2] }}</td>
+                  <td>{{ contribution[3] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <Chart :languages="true" :type="'contributions'" :contributions="selectedContributor?.contributions" />
+        </div>
         <button @click="closeModal">Close</button>
       </div>
     </div>
@@ -52,39 +85,56 @@
 </template>
 
 <script>
+
+import Chart from './Chart.vue';
+
 export default {
   props: ['contributors', 'totalPages', 'pageSize', 'currentPage'],
+  components: {Chart},
   data() {
     return {
       modalVisible: false,
       selectedContributor: null,
+      type: ''
     };
   },
   methods: {
     selectContributor(contributorId) {
       this.$emit('selectContributor', contributorId);
     },
-    showModal(contributor) {
+    showModal(contributor, type) {
       this.selectedContributor = contributor;
-      this.fetchRepositoriesForContributor(contributor);  // Fetch repositories for the selected contributor
+      if (type == 'repositories') {
+        this.fetchRepositoriesForContributor(contributor);
+      } else {
+        this.fetchContributionsPerContributor(contributor);
+      }
+      this.type = type;
       this.modalVisible = true;
     },
     async fetchRepositoriesForContributor(contributor) {
       try {
-        const response = await this.$axios.get(`http://localhost:8080/retrieveContributorsRepositories?conId=${contributor.id}`);
-        // Store repositories inside selectedContributor
+        const response = await this.$axios.get(`/retrieveContributorsRepositories?conId=${contributor.id}`);
         this.selectedContributor.repositories = response.data.repositories;
       } catch (error) {
         console.error('Error fetching repositories:', error);
       }
     },
+    async fetchContributionsPerContributor(contributor) {
+      try {
+        const response = await this.$axios.get(`/findContributionsPerContributor?conId=${contributor.id}`);
+        this.selectedContributor.contributions = response.data;
+      } catch (error) {
+        console.error('Error fetching contributions:', error);
+      }
+    },
     closeModal() {
       this.modalVisible = false;
-      this.selectedContributor = null;  // Clear the selected contributor when closing the modal
+      this.selectedContributor = null;
     },
     goToPage(pageNumber) {
       if (pageNumber >= 1 && pageNumber <= this.totalPages) {
-        this.$emit('goToPage', pageNumber);  // Trigger pagination update
+        this.$emit('goToPage', pageNumber);
       }
     },
   },
@@ -95,7 +145,6 @@ export default {
 /* Container for the entire table */
 .contributor-table-container {
   width: 100%;
-  margin: 0;
   padding: 20px 0;
   box-sizing: border-box;
 }
@@ -122,7 +171,8 @@ thead {
   font-size: 16px;
 }
 
-th, td {
+th,
+td {
   padding: 12px 15px;
   text-align: left;
 }
@@ -171,9 +221,11 @@ button:hover {
   background-color: #fff;
   padding: 20px;
   border-radius: 10px;
-  width: 450px;
-  max-width: 90%;
+  width: 80%;
+  max-width: 900px;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  max-height: 80vh; /* Limits the modal height to 80% of viewport height */
+  overflow-y: auto; /* Allows modal to scroll vertically if content overflows */
 }
 
 .modal-content h2 {
@@ -183,32 +235,38 @@ button:hover {
   font-weight: 600;
 }
 
+/* Remove bullets from li in the repositories modal */
 .modal-content ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 20px 0;
-  max-height: 200px;
-  overflow-y: auto;
+  list-style-type: none; /* Removes the bullets */
+  padding-left: 0; /* Removes default padding to align with the container */
 }
 
-.modal-content li {
-  padding: 8px 0;
-  font-size: 16px;
-  color: #555;
+/* Ensure the contributions table in the modal has vertical scrolling */
+.table-container {
+  max-height: 60vh; /* Sets a maximum height for the table container */
+  overflow-y: auto; /* Enables vertical scrolling for the table container */
+}
+
+.modal-content table {
+  width: 100%; /* Ensures the table takes full width */
+  border-collapse: collapse;
+  min-width: 600px; /* Minimum width to trigger horizontal scrolling if content is wide */
+}
+
+.modal-content th,
+.modal-content td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid #ddd;
+  white-space: nowrap; /* Prevents text wrapping */
+}
+
+.modal-content thead {
+  background-color: #f4f4f4;
 }
 
 .modal-content button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.modal-content button:hover {
-  background-color: #0056b3;
+  margin-top: 10px;
 }
 
 /* Pagination Controls */
@@ -235,19 +293,22 @@ button:hover {
     min-width: 600px;
   }
 
-  th, td {
+  .modal-content table {
+    min-width: 400px; /* Adjust minimum width for smaller screens */
+  }
+
+  th,
+  td {
     padding: 8px 10px;
     font-size: 12px;
   }
 
-  button {
-    padding: 8px 16px;
-    font-size: 12px;
+  .modal-content {
+    max-height: 90vh; /* Adjust modal height for smaller screens */
   }
 
-  .pagination-controls button {
-    padding: 6px 12px;
-    font-size: 12px;
+  .table-container {
+    max-height: 50vh; /* Adjust table container height for smaller screens */
   }
 }
 </style>

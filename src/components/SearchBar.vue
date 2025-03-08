@@ -4,7 +4,7 @@
       v-model="query"
       @keyup.enter="handleSearch"
       :placeholder="placeholder"
-      required
+      :required="!selectedLanguage ? true : false"
       class="search-input"
     />
     <button type="submit" class="search-button">
@@ -17,20 +17,23 @@
       class="filter-icon"
       @click="openFilterModal"
     />
+
+    <font-awesome-icon
+      icon="times-circle"
+      class="filter-icon"
+      @click="clear"
+    />
+    
     
     <!-- Modal for Language Filter -->
     <div v-if="showModal" class="modal-overlay" @click="closeFilterModal">
       <div class="modal-content" @click.stop>
         <h3>Select Language</h3>
         <select v-model="selectedLanguage" class="language-dropdown">
-          <option value="">All Languages</option>
-          <option value="JavaScript">JavaScript</option>
-          <option value="Python">Python</option>
-          <option value="Java">Java</option>
-          <option value="C++">C++</option>
-          <option value="Ruby">Ruby</option>
-          <!-- Add more languages as needed -->
+          <option value="">Select Language</option>
+          <option v-for="(shortName, fullName) in languageMap" :key="fullName" :value="shortName">{{ fullName }}</option>
         </select>
+        <p v-if="languageError" class="error-message">Please select a language!</p>
         <div class="modal-actions">
           <button class="apply-btn" @click="applyFilter">Apply</button>
           <button class="cancel-btn" @click="closeFilterModal">Cancel</button>
@@ -47,12 +50,21 @@ export default {
     return { 
       query: '',
       selectedLanguage: '', // Store the selected language
+      languageMap: {
+      JavaScript: "js",
+      Python: "py",
+      Java: "java",
+      "C++": "cpp",
+      Ruby: "ruby"
+    },
       showModal: false, // To toggle the modal visibility
+      languageError: false,
+      filteredSearch: false,
     };
   },
   methods: {
     handleSearch() {
-      this.$emit('search', this.query);
+      this.$emit('search', {query:this.query, selectedLanguage: this.selectedLanguage});
     },
     openFilterModal() {
       this.showModal = true;
@@ -61,9 +73,28 @@ export default {
       this.showModal = false;
     },
     applyFilter() {
-      this.$emit('applyFilter',  this.selectedLanguage);
-      this.closeFilterModal(); // Close modal after applying filter
+      if(this.selectedLanguage){
+        this.languageError = false;
+        this.filteredSearch = true;
+        this.$emit('filteredSearch', this.filteredSearch);
+        this.$emit('applyFilter',  this.selectedLanguage);
+        this.closeFilterModal(); // Close modal after applying filter
+      }else{
+        this.languageError = true;
+      }
+
     },
+    clear(){
+
+      if(this.query || this.selectedLanguage){
+        this.query = '';
+        this.selectedLanguage = '';
+      this.filteredSearch = false;
+      this.$emit('filteredSearch', this.filteredSearch);
+      this.$emit('retrieve', {retrieve: true});
+      }
+     
+    }
   },
 };
 </script>
@@ -74,24 +105,24 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 20px;
-  gap: 10px; /* Space between input and button */
-  flex-wrap: wrap; /* Ensures the items wrap on smaller screens */
-  width: 100%; /* Ensure the container takes up full width */
-  box-sizing: border-box;
+  flex-wrap: nowrap; /* Prevents wrapping */
+  gap: 10px; /* Ensures space between elements */
+  width: 100%;
 }
 
 /* Styling for input field */
 .search-input {
   padding: 12px 15px;
   font-size: 16px;
-  border: 2px solid #73b9ff; /* Light blue border */
+  border: 2px solid #007bff; /* Light blue border */
   border-radius: 8px;
   outline: none;
   width: 100%; /* Ensures it takes full width */
   max-width: 300px; /* Max width of input */
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
   margin-bottom: 10px; /* Adds space for smaller screens */
+  flex-grow: 1; /* Allows the input to expand while keeping buttons aligned */
+  max-width: 300px;
 }
 
 .search-input::placeholder {
@@ -106,7 +137,7 @@ export default {
 
 /* Styling for search button */
 .search-button {
-  background-color: #73b9ff; /* Light blue background */
+  background-color: #007bff; /* Light blue background */
   color: white;
   padding: 12px 20px;
   font-size: 16px;
@@ -116,6 +147,7 @@ export default {
   transition: background-color 0.3s ease, transform 0.2s ease;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   justify-content: center;
   min-width: 120px; /* Ensures the button is not too small */
   max-width: 300px; /* Max width of button */
@@ -136,8 +168,10 @@ export default {
   font-size: 20px;
   color: #007bff;
   cursor: pointer;
-  margin-left: 15px;
+  margin-left: 10px; /* Adjust spacing */
+  flex-shrink: 0; /* Prevent icons from shrinking */
 }
+
 
 .filter-icon:hover {
   color: #1e70b8;
@@ -196,6 +230,13 @@ export default {
   padding: 8px 12px;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+  margin-bottom: 10px;
 }
 
 .apply-btn:hover,

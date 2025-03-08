@@ -14,6 +14,7 @@ const routes = [
     path: '/repositories',
     name: 'Repositories',
     component: Repositories,
+    props: { isTrending: false }
   },
   {
     path: '/about',

@@ -3,19 +3,25 @@
     <div class="navbar-container">
       <!-- Brand/Logo -->
       <div class="navbar-brand">
-        <router-link to="/repositories" class="navbar-logo"><img src="/logo.png" alt="Logo" /></router-link>
+        <router-link to="/" class="navbar-logo">
+          <img src="/logo.png" alt="DevSkill Logo" />
+        </router-link>
       </div>
 
-      <!-- Navigation Links (Standard for larger screens) -->
-      <ul :class="[ {'navbar-links': !menuOpen},{'navbar-links-mobile': menuOpen}, { 'navbar-open': menuOpen },]">
-        <li><router-link to="/repositories">Repositories</router-link></li>
-        <li><router-link to="/trending">Trending</router-link></li>
-        <li><router-link to="/contributors">Contributors</router-link></li>
-        <li><router-link to="/about">About</router-link></li>
+      <!-- Single Navigation List with Dynamic Classes -->
+      <ul :class="[
+        'navbar-links',
+        { 'navbar-links-mobile': menuOpen && isMobile },
+        { 'navbar-open': menuOpen && isMobile }
+      ]">
+        <li><router-link to="/contributors" @click="closeMenu">Contributors</router-link></li> 
+        <li><router-link to="/repositories" @click="closeMenu">Repositories</router-link></li>
+        <li><router-link to="/trending" @click="closeMenu">Trending</router-link></li>
+        <li><router-link to="/about" @click="closeMenu">About</router-link></li>
       </ul>
 
-      <!-- Mobile Menu Toggle -->
-      <div class="navbar-toggle" @click="toggleMenu">
+      <!-- Mobile Menu Toggle (Hamburger Icon) -->
+      <div class="navbar-toggle" @click="toggleMenu" v-if="isMobile">
         <span class="navbar-toggle-icon">{{ menuOpen ? '✖' : '☰' }}</span>
       </div>
     </div>
@@ -27,13 +33,29 @@ export default {
   data() {
     return {
       menuOpen: false, // Mobile menu state
+      isMobile: false, // Track if on mobile device
     };
   },
   methods: {
     toggleMenu() {
       this.menuOpen = !this.menuOpen; // Toggle mobile menu visibility
     },
-
+    closeMenu() {
+      this.menuOpen = false; // Close menu when a link is clicked
+    },
+    checkMobile() {
+      // Update isMobile based on screen width
+      this.isMobile = window.innerWidth <= 768;
+    },
+  },
+  mounted() {
+    // Add resize event listener when component mounts
+    this.checkMobile(); // Set initial state
+    window.addEventListener('resize', this.checkMobile);
+  },
+  beforeDestroy() {
+    // Clean up event listener when component is destroyed
+    window.removeEventListener('resize', this.checkMobile);
   },
 };
 </script>
@@ -41,13 +63,13 @@ export default {
 <style scoped>
 /* General Navbar Styles */
 .navbar {
-  background-color: #509eec;
+  background-color: #007bff; /* Keep blue color for all devices (navbar) */
   padding: 14px 28px;
   color: white;
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 100%; /* Ensures full width */
   z-index: 100;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease;
@@ -57,12 +79,13 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
+  max-width: 1200px; /* Limits width on larger screens */
   margin: 0 auto;
   padding-right: 30px;
+  position: relative;
 }
 
-/* Desktop and Mobile Links */
+/* Desktop Navigation Links (Default State) */
 .navbar-links {
   list-style: none;
   display: flex;
@@ -84,21 +107,31 @@ export default {
 }
 
 .navbar-links a:hover {
-  background-color: #1abc9c; /* Hover color */
+  background-color: #1abc9c;
   transform: scale(1.05);
 }
 
-/* Mobile Menu */
+/* Mobile Menu Toggle (Hamburger Icon) */
 .navbar-toggle {
-  display: none;
+  display: none; /* Hidden by default on desktop */
+  position: absolute;
+  top: 50%; /* Center vertically */
+  right: 20px;
+  transform: translateY(-50%); /* Offset by half its height */
   cursor: pointer;
-  z-index: 101;
+  z-index: 110;
+  background: none;
+  border: none;
+  padding: 5px; /* Optional padding for the button */
 }
 
 .navbar-toggle-icon {
   font-size: 30px;
+  color: white;
+  padding: 10px; /* Added padding to the icon */
 }
 
+/* Mobile Navigation Links */
 .navbar-links-mobile {
   list-style: none;
   display: flex;
@@ -106,17 +139,18 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  background-color: #2c3e50;
+  background-color: #2c3e50; /* Dark gray for mobile menu */
   width: 100%;
   height: 100vh;
   padding: 60px 20px;
   box-sizing: border-box;
   justify-content: center;
-  z-index: 100;
+  z-index: 102;
   opacity: 0;
   visibility: hidden;
   transform: translateX(100%);
   transition: all 0.3s ease-in-out;
+  pointer-events: none;
 }
 
 .navbar-links-mobile li {
@@ -141,17 +175,37 @@ export default {
   opacity: 1;
   visibility: visible;
   transform: translateX(0%);
+  pointer-events: auto;
 }
 
 /* Media Query for Mobile Devices */
 @media (max-width: 768px) {
+  .navbar {
+    width: 100vw; /* Ensures full viewport width on small devices */
+    padding: 14px 0; /* Adjust padding to ensure full width */
+  }
 
-  .navbar-links{
-    display: none;
+  .navbar-container {
+    padding-right: 20px; /* Reduce padding on small screens */
+    max-width: none; /* Remove max-width to ensure full width */
+  }
+
+  .navbar-links {
+    display: none; /* Hide desktop links on mobile by default */
   }
 
   .navbar-toggle {
-    display: block; /* Show the mobile toggle */
+    display: block; /* Show toggle on mobile */
   }
+
+  /* Ensure mobile menu links are styled correctly when open */
+  .navbar-links-mobile {
+    display: flex; /* Ensure mobile menu is visible when open */
+  }
+}
+
+/* Logo Styling */
+.navbar-brand img {
+  height: 40px; /* Adjust as needed */
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
-  <h1>{{ header }}</h1>
-  <SearchBar @search="fetchRepository($event)" :placeholder="'Insert Repository Name or Url'" />
+  <h1>{{ header }} <span v-if="this.tolatRepo > 0">({{tolatRepo}})</span></h1>
+  <SearchBar @search="fetchRepository($event)" @filteredSearch="setfilteredSearch($event)" @retrieve="fetchRepositories($event)" :placeholder="'Insert Repository Name or Url'" />
   <RepositoryList v-if="!loading && repositories.length > 0"
     :repositories="repositories" 
     :totalPages="totalPages" 
@@ -10,12 +10,17 @@
   />
   <p v-else-if="!loading && repositories.length===0"> No results</p>
   <PulseLoader v-else-if="loading" color="#007bff"></PulseLoader>
+  <div class="chart-container" v-if="repositories.length > 0">
+    <Chart :languages="true" :type="'repositories'" />
+    <Chart :languages="false" :type="'repositories'"/>
+  </div>
 </template>
 
 <script>
 import SearchBar from './SearchBar.vue';
 import RepositoryList from './RepositoryList.vue';
 import RepositoryDetails from './RepositoryDetails.vue';
+import Chart from './Chart.vue';
 
 export default {
   props:{
@@ -25,7 +30,7 @@ export default {
       default: false,
     }
   },
-  components: { SearchBar, RepositoryList, RepositoryDetails },
+  components: { SearchBar, RepositoryList, RepositoryDetails, Chart },
   data() {
     return {
       repositories: [],
@@ -33,34 +38,67 @@ export default {
       pageSize: 0,
       currentPage: 0,
       loading: true,
+      tolatRepo: 0,
       header: "",
       repositoryCache: {}, // Cache to store repositories by page number
+      filteredSearch: false,
+      language: ''
     };
   },
   methods: {
-    async fetchRepositories(page) {
+    async fetchRepositories(object) {
 
       this.loading = true;
 
+      if(object?.retrieve){
+        this.clear();
+        object = this.currentPage
+      }
+
+
       // Check if the page data is already cached
-      if (this.repositoryCache[page]) {
-        this.repositories = this.repositoryCache[page];
-        this.currentPage = page;
+      if (this.repositoryCache[object] && this.filteredSearch === false) {
+        this.repositories = this.repositoryCache[object];
+        this.currentPage = object;
         this.loading = false;
-        console.log(`Loaded page ${page} from cache`);
+        console.log(`Loaded page ${c} from cache`);
         return;
       }
 
       try {
-        const response = await this.$axios.get(`http://localhost:8080/retrieveRepositories?page=${page}`);
+
+        let response;
+
+        if(!this.filteredSearch){
+           response = await this.$axios.get(`/retrieveRepositories?page=${object}`);
+        }else{
+          const config = {
+              headers: {
+                  "Content-Type": "application/json"
+              }
+          };
+
+          const requestBody = {
+              language: this.language
+          };
+
+           response = await this.$axios.post(
+              `/retrieveFilteredRepositories?page=${object}`,
+              requestBody, 
+              config
+             );
+        }
+        
         this.repositories = response.data.repositories;
         this.totalPages = response.data.totalPages;
         this.pageSize = response.data.pageSize;
         this.currentPage = response.data.currentPage;
+        this.tolatRepo = response.data.totalItems
         this.loading = false;
 
+
         // Cache the fetched repositories
-        this.repositoryCache[page] = response.data.repositories;
+        this.repositoryCache[object] = response.data.repositories;
       } catch (error) {
         console.error('Error fetching repositories:', error);
       }
@@ -69,39 +107,82 @@ export default {
 
       this.loading = true;
 
+      let response;
+
+      this.language = query.selectedLanguage !== undefined ? query.selectedLanguage : '';
+
       try {
-        const response = await this.$axios.get(`http://localhost:8080/retrieveRepository?name=${query}&url=${query}`);
-        this.repositories = response.data.repositories;
+        if(!query.selectedLanguage && query.query){
+           response = await this.$axios.get(`/retrieveRepository?name=${query.query}&url=${query.query}`);
+        }else if (query.selectedLanguage){
+
+          const config = {
+              headers: {
+                  "Content-Type": "application/json"
+              }
+          };
+
+          const requestBody = {
+              language: query.selectedLanguage
+          };
+
+           response = await this.$axios.post(
+              "/retrieveFilteredRepositories",
+              requestBody, 
+              config
+             );
+        }
+        
+        this.repositories = response.data.repositories != undefined ?  response.data.repositories : [];
         this.totalPages = response.data.totalPages;
         this.pageSize = response.data.pageSize;
         this.currentPage = response.data.currentPage;
+        this.tolatRepo = response.data.totalItems
         this.loading = false;
+
+
         
       } catch (error) {
         console.error('Error fetching repositories:', error);
       }
+    },
+    setfilteredSearch(filteredSearch){
+      this.filteredSearch = filteredSearch;
     },
     async fetchTrendingRepositories(page) {
 
       this.loading = true;
 
       try {
-        const response = await this.$axios.get(`http://localhost:8080/retrieveTrendingRepositories?page=${page}`);
-        this.repositories = response.data.repositories;
+        const response = await this.$axios.get(`/retrieveTrendingRepositories?page=${page}`);
+        this.repositories = response.data.repositories != undefined ?  response.data.repositories : [];
         this.totalPages = response.data.totalPages;
         this.pageSize = response.data.pageSize;
         this.currentPage = response.data.currentPage;
+        this.tolatRepo = response.data.totalItems
         this.loading = false;
+
         
       } catch (error) {
         console.error('Error fetching repositories:', error);
       }
+},
+clear(){
+   this.repositories = [];
+    this.totalPages = 0;
+    this.pageSize = 0;
+    this.currentPage = 0;
+    this.tolatRepo = 0
+    this.repositoryCache = {};
+    this.filteredSearch = false
+    this.language = ''
 },
 initRepositories(that){
     that.repositories = [];
     that.totalPages = 0;
     that.pageSize = 0;
     that.currentPage = 0;
+    that.tolatRepo = 0
     that.repositoryCache = {};
       if(that.isTrending){
         that.fetchTrendingRepositories(that.currentPage);
@@ -119,3 +200,18 @@ initRepositories(that){
   },
 };
 </script>
+
+<style scoped>
+.chart-container {
+  display: flex;
+  flex-direction: row; /* Aligns charts horizontally */
+  gap: 20px; /* Adds spacing between charts */
+  justify-content: center; /* Centers charts if they don't fill the width */
+  align-items: center; /* Vertically aligns charts */
+}
+
+/* Optional: Ensure charts don't exceed their natural size */
+.chart-container .chart {
+  max-width: 50%; /* Adjust as needed to fit two charts side by side */
+}
+</style>
