@@ -204,14 +204,23 @@ initRepositories(that){
 <style scoped>
 .chart-container {
   display: flex;
-  flex-direction: row; /* Aligns charts horizontally */
-  gap: 20px; /* Adds spacing between charts */
-  justify-content: center; /* Centers charts if they don't fill the width */
-  align-items: center; /* Vertically aligns charts */
+  flex-direction: row;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Optional: Ensure charts don't exceed their natural size */
 .chart-container .chart {
-  max-width: 50%; /* Adjust as needed to fit two charts side by side */
+  max-width: 50%;
+}
+
+@media (max-width: 768px) {
+  .chart-container {
+    flex-direction: column;
+  }
+
+  .chart-container .chart {
+    max-width: 100%;
+  }
 }
 </style>

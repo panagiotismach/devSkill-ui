@@ -19,16 +19,16 @@
             :key="repo.id"
             class="repo-row"
           >
-            <td>{{ repo.repoName }}</td>
-            <td>{{ repo.repoUrl }}</td>
-            <td>{{ repo.creation_date }}</td>
-            <td>{{ repo.last_commit_date }}</td>
-            <td>
+            <td data-label="Name">{{ repo.repoName }}</td>
+            <td data-label="Url">{{ repo.repoUrl }}</td>
+            <td data-label="Creation Date">{{ repo.creation_date }}</td>
+            <td data-label="Last Commit Date">{{ repo.last_commit_date }}</td>
+            <td data-label="Extensions">
               <!-- Show only the first 10 extensions -->
               {{ repo.extensions?.slice(0, 10).join(', ') }}
               <span v-if="repo?.extensions?.length > 10">... <a href="#" @click.stop="showModal(repo)">See All</a></span>
             </td>
-            <td>
+            <td data-label="Actions">
               <button @click.stop="fetchContributors(repo)">View Details</button>
             </td>
           </tr>
@@ -98,14 +98,12 @@ export default {
     },
     goToPage(pageNumber) {
       if (pageNumber >= 0 && pageNumber < this.totalPages) {
-        // Emit the new page number to parent component to update `currentPage`
         this.$emit('goToPage', pageNumber);
       }
     },
   },
 };
 </script>
-
 
 <style scoped>
 /* Container for the entire table */
@@ -121,6 +119,12 @@ export default {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .table-wrapper {
+    overflow-x: hidden; /* Disable horizontal scrolling on mobile */
+  }
 }
 
 table {
@@ -232,6 +236,8 @@ button:hover {
   display: flex;
   justify-content: center;
   margin-top: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .pagination-controls button {
@@ -243,27 +249,86 @@ button:hover {
 .pagination-controls span {
   font-size: 14px;
   align-self: center;
+  padding: 0 5px;
 }
 
 /* Responsive Styles */
 @media (max-width: 768px) {
   table {
-    min-width: 1000px;
+    min-width: unset;
+    width: 100%;
   }
 
   th, td {
-    padding: 8px 10px;
+    padding: 8px 5px;
     font-size: 12px;
+  }
+
+  table {
+    display: block;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    display: block;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+  }
+
+  td {
+    display: block;
+    text-align: right;
+    position: relative;
+    padding-left: 50%;
+    padding-right: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-all;
+  }
+
+  td:before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    width: 45%;
+    text-align: left;
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  td:last-child {
+    text-align: center;
+    padding-left: 0;
+  }
+
+  td:last-child button {
+    margin: 0 auto;
   }
 
   button {
-    padding: 8px 16px;
+    padding: 6px 10px;
     font-size: 12px;
   }
 
+  .pagination-controls {
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 0 10px;
+  }
+
   .pagination-controls button {
-    padding: 6px 12px;
-    font-size: 12px;
+    padding: 4px 8px;
+    font-size: 10px;
+    margin: 0;
+  }
+
+  .pagination-controls span {
+    font-size: 10px;
+    padding: 0 5px;
   }
 }
 </style>

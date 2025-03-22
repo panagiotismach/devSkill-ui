@@ -78,6 +78,10 @@ export default {
           chartType = 'pie';
         }
 
+        // Adjust aspect ratio and orientation based on screen size
+        const isMobile = window.innerWidth < 768;
+        const aspectRatio = isMobile ? 1 : 1.5;
+
         this.chartInstance = new Chart(this.$refs.chartCanvas.getContext('2d'), {
           type: chartType,
           data: {
@@ -91,14 +95,16 @@ export default {
           },
           options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: false, // Allow custom sizing
+            aspectRatio: aspectRatio, // Dynamic aspect ratio
+            indexAxis: chartType === 'bar' && isMobile ? 'y' : 'x', // Horizontal bars on mobile for bar charts
             plugins: {
               legend: {
                 display: chartType === 'pie',
                 position: 'top',
                 labels: {
                   font: {
-                    size: 14,
+                    size: isMobile ? 12 : 14, // Smaller font on mobile
                   },
                 },
               },
@@ -118,10 +124,9 @@ export default {
                 clamp: true,
                 font: {
                   weight: 'bold',
-                  size: 16,
+                  size: isMobile ? 12 : 16, // Smaller font on mobile
                 },
                 formatter: (value, context) => {
-                  // Display raw value for bar chart, percentage for pie charts
                   if (context.chart.config.type === 'bar') {
                     return value; // Show raw number for bar chart
                   } else {
@@ -136,24 +141,33 @@ export default {
               },
             },
             layout: {
-              padding: 20,
+              padding: isMobile ? 10 : 20, // Less padding on mobile
             },
-            aspectRatio: 1.5,
             scales: chartType === 'bar' ? {
-              x: {
-                ticks: {
-                  autoSkip: false,
-                  maxRotation: 45,
-                  minRotation: 45,
-                },
-                barPercentage: 0.9,
-                categoryPercentage: 0.8,
-              },
-              y: {
+              [isMobile ? 'x' : 'y']: { // Adjust axis based on orientation
                 beginAtZero: true,
                 ticks: {
                   suggestedMin: 0,
+                  font: {
+                    size: isMobile ? 10 : 12,
+                  },
                 },
+              },
+              [isMobile ? 'y' : 'x']: {
+                ticks: {
+                  autoSkip: true, // Prevent label overlap
+                  maxRotation: isMobile ? 0 : 45, // No rotation for horizontal bars
+                  minRotation: isMobile ? 0 : 45,
+                  callback: function(value) {
+                    // Truncate long labels (e.g., emails) on mobile
+                    return value.length > 15 ? value.substring(0, 15) + '...' : value;
+                  },
+                  font: {
+                    size: isMobile ? 10 : 12,
+                  },
+                },
+                barPercentage: 0.9,
+                categoryPercentage: 0.8,
               },
             } : {},
           },
@@ -171,12 +185,20 @@ export default {
 h2 {
   text-align: center;
   margin-bottom: 10px;
+  font-size: clamp(16px, 4vw, 20px); /* Responsive font size */
 }
 
 canvas {
-  max-height: 500px;
+  max-height: 400px; /* Reduced max height for better mobile fit */
   margin: auto;
   display: block;
-  width: 100%;
+  width: 100% !important; /* Ensure full width */
+  height: auto !important; /* Maintain aspect ratio */
+}
+
+@media (max-width: 768px) {
+  canvas {
+    max-height: 300px; /* Further reduce on smaller screens */
+  }
 }
 </style>

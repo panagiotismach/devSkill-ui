@@ -19,13 +19,13 @@
             @click="selectContributor(contributor.id)"
             class="contributor-row"
           >
-            <td>{{ contributor.fullName }}</td>
-            <td>{{ contributor.githubUsername }}</td>
-            <td>{{ contributor.email }}</td>
-            <td>
+            <td data-label="Name">{{ contributor.fullName }}</td>
+            <td data-label="Github Username">{{ contributor.githubUsername }}</td>
+            <td data-label="Email">{{ contributor.email }}</td>
+            <td data-label="Repositories">
               <button @click.stop="showModal(contributor, 'repositories')">View Details</button>
             </td>
-            <td>
+            <td data-label="Contributions">
               <button @click.stop="showModal(contributor, 'contributions')">View Details</button>
             </td>
           </tr>
@@ -68,10 +68,10 @@
               <tbody>
                 <tr v-for="(contribution, index) in selectedContributor?.contributions || []" :key="index">
                   <td>{{ selectedContributor.email }}</td>
-                  <td>{{ contribution[0] }}</td>
-                  <td>{{ contribution[1] }}</td>
-                  <td>{{ contribution[2] }}</td>
-                  <td>{{ contribution[3] }}</td>
+                  <td data-label="Extensions">{{ contribution[0] }}</td>
+                  <td data-label="Insertions">{{ contribution[1] }}</td>
+                  <td data-label="Deletions">{{ contribution[2] }}</td>
+                  <td data-label="Total">{{ contribution[3] }}</td>
                 </tr>
               </tbody>
             </table>
@@ -85,12 +85,11 @@
 </template>
 
 <script>
-
 import Chart from './Chart.vue';
 
 export default {
   props: ['contributors', 'totalPages', 'pageSize', 'currentPage'],
-  components: {Chart},
+  components: { Chart },
   data() {
     return {
       modalVisible: false,
@@ -204,6 +203,12 @@ button:hover {
   transform: scale(1.05);
 }
 
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Modal Styles */
 .modal-overlay {
   position: fixed;
@@ -219,61 +224,82 @@ button:hover {
 
 .modal-content {
   background-color: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  width: 80%;
-  max-width: 900px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-  max-height: 80vh; /* Limits the modal height to 80% of viewport height */
-  overflow-y: auto; /* Allows modal to scroll vertically if content overflows */
+  padding: 15px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px; /* Reduced max-width for smaller modal */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  max-height: 60vh; /* Reduced max-height for smaller modal */
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .modal-content h2 {
   margin-top: 0;
   color: #333;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
+  text-align: center;
 }
 
 /* Remove bullets from li in the repositories modal */
 .modal-content ul {
-  list-style-type: none; /* Removes the bullets */
-  padding-left: 0; /* Removes default padding to align with the container */
+  list-style-type: none;
+  padding-left: 0;
 }
 
-/* Ensure the contributions table in the modal has vertical scrolling */
+/* Ensure the contributions table in the modal has vertical and horizontal scrolling */
 .table-container {
-  max-height: 60vh; /* Sets a maximum height for the table container */
-  overflow-y: auto; /* Enables vertical scrolling for the table container */
+  max-height: 40vh; /* Reduced height to fit smaller modal */
+  overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
+/* Modal table styling with fixed width for horizontal scroll */
 .modal-content table {
-  width: 100%; /* Ensures the table takes full width */
+  width: 1000px; /* Fixed width larger than modal to force horizontal scroll */
   border-collapse: collapse;
-  min-width: 600px; /* Minimum width to trigger horizontal scrolling if content is wide */
+  background-color: #fff;
+  box-shadow: none;
 }
 
+/* Basic cell styling */
 .modal-content th,
 .modal-content td {
-  padding: 12px;
+  padding: 8px;
   text-align: left;
   border: 1px solid #ddd;
-  white-space: nowrap; /* Prevents text wrapping */
+  white-space: nowrap;
 }
 
+/* Basic header styling */
 .modal-content thead {
   background-color: #f4f4f4;
+  color: #333;
 }
 
+/* Remove extra styling for rows */
+.modal-content tr {
+  background-color: transparent;
+}
+
+/* Ensure buttons in modal are unaffected */
 .modal-content button {
   margin-top: 10px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Pagination Controls */
 .pagination-controls {
   display: flex;
   justify-content: center;
+  align-items: center;
   margin-top: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .pagination-controls button {
@@ -285,30 +311,135 @@ button:hover {
 .pagination-controls span {
   font-size: 14px;
   align-self: center;
+  padding: 0 5px;
 }
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-  table {
-    min-width: 600px;
+  .contributor-table-container {
+    padding: 10px 0;
   }
 
-  .modal-content table {
-    min-width: 400px; /* Adjust minimum width for smaller screens */
+  .table-wrapper {
+    overflow-x: hidden;
+  }
+
+  table {
+    min-width: unset;
+    width: 100%;
+    display: block;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    display: block;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+    padding: 15px 10px;
+  }
+
+  td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    position: relative;
+    padding: 8px 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+    color: #555;
+  }
+
+  td:before {
+    content: attr(data-label);
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+    flex: 0 0 40%;
+    text-align: left;
+  }
+
+  td:last-child,
+  td:nth-last-child(2) {
+    justify-content: center;
+    padding: 8px 10px;
+  }
+
+  td:last-child button,
+  td:nth-last-child(2) button {
+    margin: 5px 0;
+    width: 100%;
+    max-width: 200px;
   }
 
   th,
   td {
-    padding: 8px 10px;
     font-size: 12px;
   }
 
   .modal-content {
-    max-height: 90vh; /* Adjust modal height for smaller screens */
+    width: 95%;
+    max-width: 500px; /* Smaller max-width for mobile */
+    max-height: 70vh; /* Slightly larger height for mobile usability */
+    padding: 10px;
+  }
+
+  .modal-content h2 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  /* Modal table maintains fixed width for horizontal scroll */
+  .modal-content table {
+    width: 1000px; /* Keep fixed width for horizontal scroll */
+    display: table;
+  }
+
+  .modal-content thead {
+    display: table-header-group;
+  }
+
+  .modal-content tr {
+    display: table-row;
+  }
+
+  .modal-content td {
+    display: table-cell;
+    padding: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    border: 1px solid #ddd;
+  }
+
+  .modal-content td:before {
+    content: none;
   }
 
   .table-container {
-    max-height: 50vh; /* Adjust table container height for smaller screens */
+    max-height: 35vh; /* Reduced height for smaller modal on mobile */
+    overflow-x: auto;
+  }
+
+  .pagination-controls {
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 0 10px;
+    justify-content: center;
+  }
+
+  .pagination-controls button {
+    padding: 4px 8px;
+    font-size: 10px;
+    margin: 0;
+  }
+
+  .pagination-controls span {
+    font-size: 10px;
+    padding: 0 5px;
   }
 }
 </style>
