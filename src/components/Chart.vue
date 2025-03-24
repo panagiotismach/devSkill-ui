@@ -13,11 +13,10 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 Chart.register(PieController, ArcElement, BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend, ChartDataLabels);
 
 export default {
-  props: ['languages', 'type', 'contributions'],
+  props: ['languages', 'type', 'contributions',"header"],
   data() {
     return {
       chartInstance: null,
-      header: '',
     };
   },
   async mounted() {
@@ -45,7 +44,6 @@ export default {
         let labels, data, chartType;
 
         if (this.type === 'repositories') {
-          this.header = this.languages ? 'Repository Languages' : 'Repository Extensions';
           const languagesList = ['java', 'js', 'py', 'cpp', 'ruby'];
           const response = await this.$axios.get(
             !this.languages
@@ -57,14 +55,12 @@ export default {
           data = rawData.map(item => Object.values(item)[0]);
           chartType = 'pie';
         } else if (this.type === 'contributors') {
-          this.header = 'Ranking Contributors based on Contributions';
           const response = await this.$axios.get('/findTopContributors');
           const rawData = response.data.map(([email, contributions]) => ({ [email]: contributions }));
           labels = rawData.map(item => Object.keys(item)[0]);
           data = rawData.map(item => Object.values(item)[0]);
           chartType = 'bar';
         } else if (this.type === 'contributions') {
-          this.header = 'Top 5 Contributions by Total';
           if (!this.contributions || !this.contributions.length) {
             throw new Error('No contributions data provided');
           }

@@ -9,7 +9,7 @@
             <th>Github Username</th>
             <th>Email</th>
             <th>Repositories</th>
-            <th>Contributions</th>
+            <th>Changes</th>
           </tr>
         </thead>
         <tbody>
@@ -25,7 +25,7 @@
             <td data-label="Repositories">
               <button @click.stop="showModal(contributor, 'repositories')">View Details</button>
             </td>
-            <td data-label="Contributions">
+            <td data-label="Changes">
               <button @click.stop="showModal(contributor, 'contributions')">View Details</button>
             </td>
           </tr>
@@ -60,15 +60,17 @@
                 <tr>
                   <th>Email</th>
                   <th>Extensions</th>
+                  <th>Language</th>
                   <th>Insertions</th>
                   <th>Deletions</th>
                   <th>Total</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(contribution, index) in selectedContributor?.contributions || []" :key="index">
+                <tr v-for="(contribution, index) in selectedContributor?.mappedContributions || []" :key="index">
                   <td>{{ selectedContributor.email }}</td>
                   <td data-label="Extensions">{{ contribution[0] }}</td>
+                  <td data-label="Language">{{ contribution[4] }}</td>
                   <td data-label="Insertions">{{ contribution[1] }}</td>
                   <td data-label="Deletions">{{ contribution[2] }}</td>
                   <td data-label="Total">{{ contribution[3] }}</td>
@@ -76,7 +78,7 @@
               </tbody>
             </table>
           </div>
-          <Chart :languages="true" :type="'contributions'" :contributions="selectedContributor?.contributions" />
+          <Chart :languages="true" :type="'contributions'" :contributions="selectedContributor?.contributions" :header="'Top 5 Extensions by Contributions'"/>
         </div>
         <button @click="closeModal">Close</button>
       </div>
@@ -86,6 +88,7 @@
 
 <script>
 import Chart from './Chart.vue';
+import * as langmap from "lang-map";
 
 export default {
   props: ['contributors', 'totalPages', 'pageSize', 'currentPage'],
@@ -122,7 +125,20 @@ export default {
     async fetchContributionsPerContributor(contributor) {
       try {
         const response = await this.$axios.get(`/findContributionsPerContributor?conId=${contributor.id}`);
-        this.selectedContributor.contributions = response.data;
+
+        this.selectedContributor.contributions = response.data
+
+        this.selectedContributor.mappedContributions = response.data.map((contribution) => {
+        const language = langmap.languages(contribution[0]); // Map extension to language
+        return [
+          contribution[0], // Extension
+          contribution[1], // Insertions
+          contribution[2], // Deletions
+          contribution[3], // Total
+          language ? language[0] : "Unknown" // Add language as the 5th element
+        ];
+    });
+
       } catch (error) {
         console.error('Error fetching contributions:', error);
       }

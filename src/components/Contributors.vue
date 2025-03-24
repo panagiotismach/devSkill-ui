@@ -11,7 +11,7 @@
   />
   <p v-else-if="!loading && contributors.length===0"> No results</p>
   <PulseLoader v-else-if="loading" color="#007bff"></PulseLoader>
-  <Chart :languages="true" :type="'contributors'"/>
+  <Chart :languages="true" :type="'contributors'" :header="'Top 5 Contributors based on changes'"/>
 </template>
 
 <script>
