@@ -191,13 +191,13 @@ initRepositories(that){
       if(that.isTrending){
         that.fetchTrendingRepositories(that.currentPage);
         that.header = "Trending Repositories";
-        that.headerChart.headerLanguages = 'Repository Languages';
-        that.headerChart.headerExtensions = 'Repository Extensions';
+        that.headerChart.headerLanguages = 'Trending Repository Languages';
+        that.headerChart.headerExtensions = 'Trending Repository Extensions';
     }else{
       that.fetchRepositories(that.currentPage);
       that.header = "Open Source Repositories";
-      that.headerChart.headerLanguages = 'Trending Repository Languages';
-        that.headerChart.headerExtensions = 'Trending Repository Extensions';
+      that.headerChart.headerLanguages = 'Repository Languages';
+        that.headerChart.headerExtensions = 'Repository Extensions';
     }
   }
   },
