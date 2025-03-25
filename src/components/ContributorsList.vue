@@ -53,7 +53,7 @@
           <p v-else>No repositories found.</p>
         </div>
         <div v-else>
-          <h2>Contributions ({{ selectedContributor?.contributions.length }})</h2>
+          <h2>Changes ({{ selectedContributor?.contributions.length }})</h2>
           <div class="table-container">
             <table>
               <thead>

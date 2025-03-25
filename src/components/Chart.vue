@@ -43,7 +43,13 @@ export default {
       try {
         let labels, data, chartType;
 
-        if (this.type === 'repositories') {
+        if(this.type === 'repositories'){
+          const response = await this.$axios.get('/findTop5RepositoriesBasedOnContributors');
+      const rawData = response.data;
+      labels = rawData.map(item => item[0].repoName);
+      data = rawData.map(item => item[1]);
+      chartType = 'bar';
+        }else if (this.type === 'extensions') {
           const languagesList = ['java', 'js', 'py', 'cpp', 'ruby'];
           const response = await this.$axios.get(
             !this.languages

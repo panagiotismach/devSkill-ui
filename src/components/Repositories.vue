@@ -10,10 +10,11 @@
   />
   <p v-else-if="!loading && repositories.length===0"> No results</p>
   <PulseLoader v-else-if="loading" color="#007bff"></PulseLoader>
-  <div class="chart-container" v-if="repositories.length > 0">
+  <!-- <div class="chart-container" v-if="repositories.length > 0">
     <Chart :languages="true" :type="'repositories'" :header="headerChart.headerLanguages" />
     <Chart :languages="false" :type="'repositories'" :header="headerChart.headerExtensions"/>
-  </div>
+  </div> -->
+  <Chart :languages="false" :type="'repositories'" :header="'Top 5 Repositories based on contributors'"/>
 </template>
 
 <script>
