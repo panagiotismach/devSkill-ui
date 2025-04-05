@@ -17,6 +17,7 @@
         <li><router-link to="/contributors" @click="closeMenu">Contributors</router-link></li>
         <li><router-link to="/repositories" @click="closeMenu">Repositories</router-link></li>
         <li><router-link to="/trending" @click="closeMenu">Trending</router-link></li>
+        <li><router-link to="/extensions" @click="closeMenu">Extensions</router-link></li>
         <li><router-link to="/about" @click="closeMenu">About</router-link></li>
       </ul>
 

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Repositories from '../components/Repositories.vue';
 import About from '../components/About.vue';
 import Contributors from '../components/Contributors.vue';
+import Extensions from '../components/Extensions.vue';
 import error404 from '../components/404.vue';
 
 const routes = [
@@ -16,6 +17,12 @@ const routes = [
     component: Repositories,
     props: { isTrending: false }
   },
+  {
+    path: '/extensions',
+    name: 'extensions',
+    component: Extensions,
+  }
+  ,
   {
     path: '/about',
     name: 'About',
