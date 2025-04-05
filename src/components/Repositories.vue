@@ -8,13 +8,17 @@
     :currentPage="currentPage"  
     @goToPage=" isTrending ? fetchRepositories($event) : fetchTrendingRepositories($event)" 
   />
-  <p v-else-if="!loading && repositories.length===0"> No results</p>
+  
+  <p v-else-if="!loading && !error && repositories.length===0"> No results</p>
   <PulseLoader v-else-if="loading" color="#007bff"></PulseLoader>
+  <div v-else-if="error" class="error-message">{{ error }}</div>
   <!-- <div class="chart-container" v-if="repositories.length > 0">
     <Chart :languages="true" :type="'repositories'" :header="headerChart.headerLanguages" />
     <Chart :languages="false" :type="'repositories'" :header="headerChart.headerExtensions"/>
   </div> -->
-  <Chart :languages="false" :type="'repositories'" :header="'Top 5 Repositories based on contributors'"/>
+  <div class="chart-container" v-if="repositories.length > 0">
+    <Chart :languages="false" :type="'repositories'" :header="'Top 5 Repositories based on contributors'"/>
+  </div>
 </template>
 
 <script>
@@ -47,13 +51,15 @@ export default {
       },
       repositoryCache: {}, // Cache to store repositories by page number
       filteredSearch: false,
-      language: ''
+      language: '',
+      error: null
     };
   },
   methods: {
     async fetchRepositories(object) {
 
       this.loading = true;
+      this.error = null;
 
       if(object?.retrieve){
         this.clear();
@@ -105,12 +111,14 @@ export default {
         // Cache the fetched repositories
         this.repositoryCache[object] = response.data.repositories;
       } catch (error) {
-        console.error('Error fetching repositories:', error);
+        this.error = 'Failed to load repositories. Please try again.';
+        this.loading = false;
       }
     },
     async fetchRepository(query) {
 
       this.loading = true;
+      this.error = null;
 
       let response;
 
@@ -148,7 +156,8 @@ export default {
 
         
       } catch (error) {
-        console.error('Error fetching repositories:', error);
+        this.error = 'Failed to load repositories. Please try again.';
+        this.loading = false;
       }
     },
     setfilteredSearch(filteredSearch){
@@ -157,6 +166,7 @@ export default {
     async fetchTrendingRepositories(page) {
 
       this.loading = true;
+      this.error = null;
 
       try {
         const response = await this.$axios.get(`/retrieveTrendingRepositories?page=${page}`);
@@ -169,7 +179,8 @@ export default {
 
         
       } catch (error) {
-        console.error('Error fetching repositories:', error);
+        this.error = 'Failed to load trending repositories. Please try again.';
+        this.loading = false;
       }
 },
 clear(){
@@ -221,6 +232,16 @@ initRepositories(that){
 
 .chart-container .chart {
   max-width: 50%;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin: 10px 0;
+  border-left: 4px solid #c62828;
+  font-weight: 500;
 }
 
 @media (max-width: 768px) {

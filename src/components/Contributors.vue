@@ -1,7 +1,7 @@
 <template>
   <h1>Contributors <span v-if="totalContributor > 0"> ({{ totalContributor }}) </span></h1>
   <SearchBar @search="fetchContributor" @filteredSearch="setfilteredSearch($event)" @retrieve="fetchContributors($event)" :placeholder="'Insert Name or Githubs Username'" />
-  <ContributorsList v-if="!loading" 
+  <ContributorsList v-if="!loading && contributors.length > 0" 
     :contributors="contributors" 
     :totalPages="totalPages" 
     :pageSize="pageSize" 
@@ -9,9 +9,12 @@
     @selectCont="fetchContributors" 
     @goToPage="fetchContributors($event)" 
   />
-  <p v-else-if="!loading && contributors.length===0"> No results</p>
+  <p v-else-if="!loading && !error && contributors.length===0"> No results</p>
   <PulseLoader v-else-if="loading" color="#007bff"></PulseLoader>
-  <Chart :languages="true" :type="'contributors'" :header="'Top 5 Contributors based on changes'"/>
+  <div v-else-if="error" class="error-message">{{ error }}</div>
+  <div class="chart-container" v-if="contributors.length > 0">
+    <Chart :languages="true" :type="'contributors'" :header="'Top 5 Contributors based on changes'"/>
+  </div>
 </template>
 
 <script>
@@ -31,13 +34,15 @@ export default {
       loading: true,
       contributorsCache: {}, // Cache to store repositories by page number
       filteredSearch: false,
-      language: ''
+      language: '',
+      error: null
     };
   },
   methods: {
     async fetchContributors(object) {
 
       this.loading = true;
+      this.error = null;
 
 
 
@@ -92,7 +97,8 @@ export default {
         // Cache the fetched repositories
         this.contributorsCache[object] = response.data.contributors;
       } catch (error) {
-        console.error('Error fetching repositories:', error);
+        this.error = 'Failed to load contributors. Please try again.';
+        this.loading = false;
       }
     },
     setfilteredSearch(filteredSearch){
@@ -101,6 +107,7 @@ export default {
     async fetchContributor(query) {
 
       this.loading = true;
+      this.error = null;
 
       let response;
 
@@ -139,7 +146,8 @@ export default {
         this.loading = false;
         
       } catch (error) {
-        console.error('Error fetching repositories:', error);
+        this.error = 'Failed to load contributors. Please try again.';
+        this.loading = false;
       }
     },
     clear(){
@@ -158,3 +166,37 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.chart-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+.chart-container .chart {
+  max-width: 50%;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin: 10px 0;
+  border-left: 4px solid #c62828;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .chart-container {
+    flex-direction: column;
+  }
+
+  .chart-container .chart {
+    max-width: 100%;
+  }
+}
+</style>
