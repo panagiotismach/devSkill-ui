@@ -12,10 +12,6 @@
   <p v-else-if="!loading && !error && repositories.length===0"> No results</p>
   <PulseLoader v-else-if="loading" color="#007bff"></PulseLoader>
   <div v-else-if="error" class="error-message">{{ error }}</div>
-  <!-- <div class="chart-container" v-if="repositories.length > 0">
-    <Chart :languages="true" :type="'repositories'" :header="headerChart.headerLanguages" />
-    <Chart :languages="false" :type="'repositories'" :header="headerChart.headerExtensions"/>
-  </div> -->
   <div class="chart-container" v-if="repositories.length > 0">
     <Chart :languages="false" :type="'repositories'" :header="'Top 5 Repositories based on contributors'"/>
   </div>
@@ -45,10 +41,6 @@ export default {
       loading: true,
       tolatRepo: 0,
       header: "",
-      headerChart: {
-        headerLanguages: "",
-        headerExtensions: "",
-      },
       repositoryCache: {}, // Cache to store repositories by page number
       filteredSearch: false,
       language: '',
@@ -203,13 +195,9 @@ initRepositories(that){
       if(that.isTrending){
         that.fetchTrendingRepositories(that.currentPage);
         that.header = "Trending Repositories";
-        that.headerChart.headerLanguages = 'Trending Repository Languages';
-        that.headerChart.headerExtensions = 'Trending Repository Extensions';
     }else{
       that.fetchRepositories(that.currentPage);
       that.header = "Open Source Repositories";
-      that.headerChart.headerLanguages = 'Repository Languages';
-        that.headerChart.headerExtensions = 'Repository Extensions';
     }
   }
   },

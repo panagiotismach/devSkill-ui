@@ -7,9 +7,8 @@
         @retrieve="fetchExtensions($event)" 
         :placeholder="'Search by Extension (e.g., js, java, py)'" 
       />
-      <ExtensionsList 
+      <ExtensionsList v-if="!loading && extensions.length > 0"
         :key="currentPage"
-        v-if="!loading && extensions.length > 0"
         :extensions="extensions"
         :totalPages="totalPages"
         :pageSize="pageSize"
@@ -20,7 +19,8 @@
       <PulseLoader v-else-if="loading" color="#007bff" />
       <div v-else-if="error" class="error-message">{{ error }}</div>
       <div class="chart-container" v-if="extensions.length > 0">
-        <Chart :languages="false" :type="'extensions'" :header="'Top 5 Most Used Extensions'" />
+        <Chart :languages="true" :type="'extensions'" :header="headerChart.headerLanguages" />
+        <Chart :languages="false" :type="'extensions'" :header="headerChart.headerExtensions"/>
       </div>
     </div>
   </template>
@@ -29,6 +29,7 @@
   import SearchBar from './SearchBar.vue';
   import ExtensionsList from './ExtensionsList.vue';
   import Chart from './Chart.vue';
+  import * as langmap from "lang-map";
   
   export default {
     components: { SearchBar, ExtensionsList, Chart },
@@ -42,6 +43,10 @@
         loading: true,
         header: "File Extensions",
         extensionCache: {},
+        headerChart: {
+        headerLanguages: "Repository Languages",
+        headerExtensions: "Repository Extensions",
+      },
         filteredSearch: false,
         filterExtension: '',
         error: null
@@ -58,6 +63,7 @@
           console.log(`Mapping extension item ${index}:`, item);
           return {
             name: item.name || item.extension || item.extensionName || 'N/A',
+            language: langmap.languages(item.name)[0] || 'N/A',
             fileCount: item.fileCount ?? item.files ?? 0,
             repoCount: item.repoCount ?? item.repositories ?? 0,
             lastUsed: item.lastUsed || item.recentUse || item.mostRecentUse || 'N/A'

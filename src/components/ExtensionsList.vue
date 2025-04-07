@@ -5,6 +5,7 @@
           <thead>
             <tr>
               <th>Extension</th>
+              <th>Language</th>
               <th>File Count</th>
               <th>Repositories Using</th>
               <th>Most Recent Use</th>
@@ -18,6 +19,7 @@
               class="extension-row"
             >
               <td data-label="Extension">{{ extension.name || 'N/A' }}</td>
+              <td data-label="Extension">{{ extension.language || 'N/A' }}</td>
               <td data-label="File Count">{{ extension.fileCount ?? '0' }}</td>
               <td data-label="Repositories Using">{{ extension.repoCount ?? '0' }}</td>
               <td data-label="Most Recent Use">{{ extension.lastUsed || 'N/A' }}</td>
@@ -253,7 +255,6 @@ button:hover {
     width: 100% !important;
     border-radius: 0; /* Remove border-radius from table in mobile */
     background-color: transparent; /* Background applied to tr instead */
-    display: block;
   }
 
   th,
