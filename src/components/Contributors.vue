@@ -87,7 +87,7 @@ export default {
              );
         }
         
-        this.contributors = response.data.contributors;
+        this.contributors = response.data.contributors || [];
         this.totalPages = response.data.totalPages;
         this.pageSize = response.data.pageSize;
         this.currentPage = response.data.currentPage;
@@ -95,7 +95,7 @@ export default {
         this.loading = false;
 
         // Cache the fetched repositories
-        this.contributorsCache[object] = response.data.contributors;
+        this.contributorsCache[object] = response.data.contributors || [];
       } catch (error) {
         this.error = 'Failed to load contributors. Please try again.';
         this.loading = false;
@@ -138,7 +138,7 @@ export default {
 
         console.log(response)
         
-        this.contributors = response.data.contributors;
+        this.contributors = response.data.contributors || [];
         this.totalPages = response.data.totalPages;
         this.pageSize = response.data.pageSize;
         this.currentPage = response.data.currentPage;

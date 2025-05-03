@@ -92,7 +92,7 @@ export default {
              );
         }
         
-        this.repositories = response.data.repositories;
+        this.repositories = response.data.repositories || [];
         this.totalPages = response.data.totalPages;
         this.pageSize = response.data.pageSize;
         this.currentPage = response.data.currentPage;
@@ -100,8 +100,9 @@ export default {
         this.loading = false;
 
 
+
         // Cache the fetched repositories
-        this.repositoryCache[object] = response.data.repositories;
+        this.repositoryCache[object] = response.data.repositories || [];
       } catch (error) {
         this.error = 'Failed to load repositories. Please try again.';
         this.loading = false;
