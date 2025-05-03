@@ -6,7 +6,7 @@
     :totalPages="totalPages" 
     :pageSize="pageSize" 
     :currentPage="currentPage"  
-    @goToPage=" isTrending ? fetchRepositories($event) : fetchTrendingRepositories($event)" 
+    @goToPage=" !isTrending ? fetchRepositories($event) : fetchTrendingRepositories($event)" 
   />
   
   <p v-else-if="!loading && !error && repositories.length===0"> No results</p>
