@@ -196,6 +196,13 @@ button:hover {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
+.modal-content ul li, .modal-content div {
+  color: #213547;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
 .modal-content h2 {
   margin-top: 0;
   color: #333;

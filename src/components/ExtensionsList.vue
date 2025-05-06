@@ -199,6 +199,13 @@ button:hover {
   font-weight: 600;
 }
 
+.modal-content ul li, .modal-content div {
+  color: #213547;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
 .modal-content ul {
   list-style-type: none;
   padding: 0;

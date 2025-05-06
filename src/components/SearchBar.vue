@@ -231,6 +231,17 @@ export default {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+h3{
+  color: #213547;
+}
+
+.modal-content  {
+  color: #213547;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
 /* Language dropdown */
 .language-dropdown {
   padding: 10px;
@@ -240,6 +251,11 @@ export default {
   background-color: white;
   width: 100%;
   margin-bottom: 15px;
+  color: #213547;
+}
+
+.language-dropdown option {
+  color: #213547; /* Explicitly set color for options */
 }
 
 .language-dropdown:focus {

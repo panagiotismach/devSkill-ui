@@ -264,6 +264,13 @@ button:disabled {
   padding-left: 0;
 }
 
+.modal-content ul li {
+  color: #213547; /* Dark gray for contrast against white background */
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
 /* Ensure the contributions table in the modal has vertical and horizontal scrolling */
 .table-container {
   max-height: 40vh; /* Reduced height to fit smaller modal */
