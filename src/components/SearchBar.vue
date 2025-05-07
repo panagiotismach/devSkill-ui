@@ -40,8 +40,8 @@
         <h3>Select Language</h3>
         <select v-model="selectedLanguage" class="language-dropdown">
           <option value="">Select Language</option>
-          <option v-for="(extension, i) in allExtensions" :key="i" :value="extension">
-              {{ extension }}
+          <option v-for="(language, i) in selectableLanguage" :key="i" :value="language.code">
+              {{ language.name }}
             </option>
         </select>
         <p v-if="languageError" class="error-message">Please select a language!</p>
@@ -55,6 +55,8 @@
 </template>
 
 <script>
+import * as langmap from "lang-map";
+
 export default {
   props: ['placeholder'],
   data() {
@@ -62,12 +64,38 @@ export default {
       query: '',
       selectedLanguage: '', // Store the selected language
       allExtensions: null,
-     famous: [
-  { code: 'js', name: 'JavaScript', popularity: 1 },
-  { code: 'py', name: 'Python', popularity: 2 },
+     selectableLanguage: [
+  { code: 'py', name: 'Python', popularity: 1 },
+  { code: 'js', name: 'JavaScript', popularity: 2 },
   { code: 'java', name: 'Java', popularity: 3 },
   { code: 'cpp', name: 'C++', popularity: 4 },
-   ],
+  { code: 'cs', name: 'C#', popularity: 5 },
+  { code: 'php', name: 'PHP', popularity: 6 },
+  { code: 'r', name: 'R', popularity: 7 },
+  { code: 'sql', name: 'SQL', popularity: 8 },
+  { code: 'go', name: 'Go', popularity: 9 },
+  { code: 'swift', name: 'Swift', popularity: 10 },
+  { code: 'ruby', name: 'Ruby', popularity: 11 },
+  { code: 'ts', name: 'TypeScript', popularity: 12 },
+  { code: 'kotlin', name: 'Kotlin', popularity: 13 },
+  { code: 'rust', name: 'Rust', popularity: 14 },
+  { code: 'scala', name: 'Scala', popularity: 15 },
+  { code: 'perl', name: 'Perl', popularity: 16 },
+  { code: 'haskell', name: 'Haskell', popularity: 17 },
+  { code: 'lua', name: 'Lua', popularity: 18 },
+  { code: 'fortran', name: 'Fortran', popularity: 19 },
+  { code: 'cobol', name: 'COBOL', popularity: 20 },
+  { code: 'c', name: 'C', popularity: 21 },
+  { code: 'dart', name: 'Dart', popularity: 22 },
+  { code: 'elixir', name: 'Elixir', popularity: 23 },
+  { code: 'erlang', name: 'Erlang', popularity: 24 },
+  { code: 'groovy', name: 'Groovy', popularity: 25 },
+  { code: 'julia', name: 'Julia', popularity: 26 },
+  { code: 'lisp', name: 'Lisp', popularity: 27 },
+  { code: 'matlab', name: 'MATLAB', popularity: 28 },
+  { code: 'objc', name: 'Objective-C', popularity: 29 },
+  { code: 'powershell', name: 'PowerShell', popularity: 30 }
+],
       showModal: false, // To toggle the modal visibility
       languageError: false,
       filteredSearch: false,
@@ -75,6 +103,7 @@ export default {
   },
   methods: {
     handleSearch() {
+      console.log(this.selectedLanguage);
       this.$emit('search', {query:this.query, selectedLanguage: this.selectedLanguage});
     },
     openFilterModal() {
@@ -83,22 +112,7 @@ export default {
     closeFilterModal() {
       this.showModal = false;
     },
-    async findAllExtensions(){
-      try{
-        const response = await this.$axios.get(`/findAllExtensions`);
-
-           this.allExtensions = response.data.sort((a, b) => {
-          const isAFamous = this.famous.some(f => f.code === a);
-          const isBFamous = this.famous.some(f => f.code === b);
-
-          return isBFamous - isAFamous;
-});
-
-    
-      }catch(e){
-         console.log(e)
-      }
-    },
+ 
     applyFilter() {
       if(this.selectedLanguage){
         this.languageError = false;
@@ -124,9 +138,6 @@ export default {
      
     }
   },
-  created(){
-    this.findAllExtensions();
-  }
 };
 </script>
 

@@ -194,6 +194,8 @@ button:hover {
   width: 450px;
   max-width: 90%;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .modal-content ul li, .modal-content div {
