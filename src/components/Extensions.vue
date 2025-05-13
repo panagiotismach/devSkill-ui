@@ -70,14 +70,12 @@
           page = 0;
         }
   
-        console.log(`Fetching extensions for page ${page}, filtered: ${this.filteredSearch}`);
   
         if (this.extensionCache[page] && !this.filteredSearch) {
           console.log(`Loading page ${page} from cache`);
           this.extensions = [...this.extensionCache[page]];
           this.currentPage = page;
           this.loading = false;
-          console.log('Extensions data after loading from cache:', this.extensions);
           return;
         }
 
@@ -167,7 +165,6 @@
           this.totalItems = response.data.totalItems || 0;
           this.extensionCache[0] = [...this.extensions];
           console.log(`Cached page 0 with ${this.extensions.length} extensions`);
-          console.log('Mapped Extensions data after fetchExtension:', this.extensions);
           this.loading = false;
         } catch (error) {
           console.error('Error fetching extension:', error);
@@ -184,7 +181,6 @@
           this.filteredSearch = filteredSearch;
           if (filteredSearch) {
             this.extensionCache = {};
-            console.log('Cleared cache due to filteredSearch change');
           }
         }
       },
