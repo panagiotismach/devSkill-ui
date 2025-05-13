@@ -185,7 +185,6 @@
         }
       },
       handlePageChange(newPage) {
-        console.log(`Handling page change to page ${newPage}`);
         this.currentPage = newPage;
         this.fetchExtensions(newPage);
       },
