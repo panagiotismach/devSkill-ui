@@ -7,8 +7,20 @@
               <th>Extension</th>
               <th>Language</th>
               <th>File Count</th>
-              <th>Repositories Using</th>
-              <th>Most Recent Use</th>
+              <th>Repositories Using
+                <font-awesome-icon
+                :icon="'sort'"
+                class="sort-icon"
+                @click="toggleSort('repoCount')"
+              />
+              </th>
+              <th>Most Recent Use
+                <font-awesome-icon
+                :icon="'sort'"
+                class="sort-icon"
+                @click="toggleSort('lastUsed')"
+              />
+              </th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -19,9 +31,9 @@
               class="extension-row"
             >
               <td data-label="Extension">{{ extension.name || 'N/A' }}</td>
-              <td data-label="Extension">{{ extension.language || 'N/A' }}</td>
-              <td data-label="File Count">{{ extension.fileCount ?? '0' }}</td>
-              <td data-label="Repositories Using">{{ extension.repoCount ?? '0' }}</td>
+              <td data-label="Extension">{{ extension.language.join(', ') || 'N/A' }}</td>
+              <td data-label="File Count">{{ extension.fileCount ?? 'N/A' }}</td>
+              <td data-label="Repositories Using">{{ extension.repoCount ?? 'N/A' }}</td>
               <td data-label="Most Recent Use">{{ extension.lastUsed || 'N/A' }}</td>
               <td data-label="Actions">
                 <button @click.stop="fetchDetails(extension)">View Details</button>
@@ -42,8 +54,8 @@
           <h2>Extension Details</h2>
           <div class="detail-section">
             <p><strong>Extension:</strong> {{ selectedExtension.name || 'N/A' }}</p>
-            <p><strong>Total Files:</strong> {{ selectedExtension.fileCount ?? '0' }}</p>
-            <p><strong>Repositories:</strong> {{ selectedExtension.repoCount ?? '0' }}</p>
+            <p><strong>Total Files:</strong> {{ selectedExtension.fileCount ?? 'N/A' }}</p>
+            <p><strong>Repositories:</strong> {{ selectedExtension.repoCount ?? 'N/A' }}</p>
             <p><strong>Last Used:</strong> {{ selectedExtension.lastUsed || 'N/A' }}</p>
           </div>
           <button @click="closeModal">Close</button>
@@ -53,6 +65,8 @@
   </template>
   
   <script>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+
   export default {
     props: {
       extensions: {
@@ -79,7 +93,10 @@
     data() {
       return {
         modalVisible: false,
-        selectedExtension: null
+        selectedExtension: null,
+        sortDirection: "desc",
+        sortField: 'lastUsed'
+
       };
     },
     methods: {
@@ -96,7 +113,13 @@
         if (pageNumber >= 0 && pageNumber < this.totalPages) {
           this.$emit('goToPage', pageNumber);
         }
-      }
+      },
+      toggleSort(field) {
+
+        this.sortField = field
+      
+      this.$emit('sort', { field: this.sortField});
+    }
     }
   };
   </script>
@@ -337,6 +360,24 @@ button:hover {
     padding: 0 10px;
   }
 
+  /* New styles for sort icon */
+.sort-icon {
+  margin-left: 8px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: color 0.3s ease;
+}
+
+.sort-icon:hover {
+  color: #007bff;
+}
+
+.sort-icon {
+    font-size: 12px;
+  }
+
   .pagination-controls button {
     padding: 4px 8px;
     font-size: 10px;
@@ -374,6 +415,10 @@ button:hover {
 
   .pagination-controls span {
     font-size: 9px;
+  }
+
+  .sort-icon {
+    font-size: 10px;
   }
 }
 </style>

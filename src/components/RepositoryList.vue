@@ -21,7 +21,7 @@
           >
             <td data-label="Name">{{ repo.repoName }}</td>
             <td data-label="Url">{{ repo.repoUrl }}</td>
-            <td data-label="Creation Date">{{ repo.creation_date }}</td>
+            <td data-label="Creation Date">{{ repo.creationDate }}</td>
             <td data-label="Last Commit Date">{{ repo.last_commit_date }}</td>
             <td data-label="Extensions">
               <!-- Show only the first 10 extensions -->

@@ -5,12 +5,12 @@ import router from './router/index.js'
 import axios from 'axios'
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faSearch, faFilter, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
+import { faSearch, faFilter, faTimesCircle, faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { API_BASE_URL } from './config.ts'
 
 // Add FontAwesome icons in a single call
-library.add(faSearch, faFilter, faTimesCircle)
+library.add(faSearch, faFilter, faTimesCircle, faSort, faSortUp, faSortDown)
 
 // Create app instance
 const app = createApp(App)

@@ -100,6 +100,8 @@ export default {
         this.loading = false;
 
 
+        console.log( this.repositories);
+
 
         // Cache the fetched repositories
         this.repositoryCache[object] = response.data.repositories || [];

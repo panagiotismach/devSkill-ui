@@ -14,6 +14,7 @@
         :pageSize="pageSize"
         :currentPage="currentPage"
         @goToPage="handlePageChange($event)"
+        @sort="sortExtensions($event)"
       />
       <p v-else-if="!loading && !error && extensions.length === 0">No extensions found</p>
       <PulseLoader v-else-if="loading" color="#007bff" />
@@ -49,28 +50,13 @@
       },
         filteredSearch: false,
         filterExtension: '',
-        error: null
+        error: null,
+        sortField : 'repoCount',
+        sortDirection : 'desc'
       };
     },
     methods: {
-      // Map API response to the expected structure
-      mapExtensions(data) {
-        if (!Array.isArray(data)) {
-          console.error('API response extensions is not an array:', data);
-          return [];
-        }
-        return data.map((item, index) => {
-          console.log(`Mapping extension item ${index}:`, item);
-          return {
-            name: item.name || item.extension || item.extensionName || 'N/A',
-            language: langmap.languages(item.name)[0] || 'N/A',
-            fileCount: item.fileCount ?? item.files ?? 0,
-            repoCount: item.repoCount ?? item.repositories ?? 0,
-            lastUsed: item.lastUsed || item.recentUse || item.mostRecentUse || 'N/A'
-          };
-        });
-      },
-      async fetchExtensions(page) {
+      async fetchExtensions(page, sortOptions = {}) {
         this.loading = true;
         this.error = null;
   
@@ -94,11 +80,15 @@
           console.log('Extensions data after loading from cache:', this.extensions);
           return;
         }
+
+        const sortField = sortOptions.field || this.sortField;
+       const sortDirection = sortOptions.direction || this.sortDirection;
   
         try {
           let response;
           if (!this.filteredSearch) {
-            response = await this.$axios.get(`/retrieveExtensions?page=${page}&size=${this.pageSize}`);
+            const path =  sortField ? `&type=${sortField}&function=${sortDirection}` : '';
+            response = await this.$axios.get(`/retrieveExtensions?page=${page}&size=${this.pageSize}` + path );
           } else {
             const config = {
               headers: { "Content-Type": "application/json" }
@@ -114,7 +104,7 @@
           console.log(`Raw API Response for page ${page}:`, response.data);
   
           // Map the API response to the expected structure
-          this.extensions = this.mapExtensions(response.data.extensions || []);
+          this.extensions = response.data.extensions || []
           this.totalPages = response.data.totalPages || 0;
           this.pageSize = response.data.pageSize || 10;
           this.currentPage = Number(response.data.currentPage) || 0;
@@ -133,6 +123,13 @@
           this.totalItems = 0;
         }
       },
+      sortExtensions({ field }) {
+      this.sortField = field;
+      this.sortDirection = this.sortDirection === 'desc' ? 'asc' :  'desc';
+      this.extensionCache = {}; 
+      
+      this.fetchExtensions(this.currentPage, { field: this.sortField, direction: this.sortDirection });
+    },
       async fetchExtension(query) {
         this.loading = true;
         this.error = null;
@@ -166,7 +163,7 @@
           console.log('Raw API Response (fetchExtension):', response.data);
   
           // Map the API response to the expected structure
-          this.extensions = this.mapExtensions(response.data.extensions || []);
+          this.extensions = response.data.extensions || []
           this.totalPages = response.data.totalPages || 0;
           this.pageSize = response.data.pageSize || 10;
           this.currentPage = Number(response.data.currentPage) || 0;
@@ -212,7 +209,7 @@
         console.log('Cleared state');
       },
       initExtensions() {
-        this.fetchExtensions(this.currentPage);
+        this.fetchExtensions(this.currentPage, { field :this.sortField, direction: this.sortDirection});
       }
     },
     beforeRouteEnter(to, from, next) {
