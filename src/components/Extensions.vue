@@ -101,8 +101,6 @@
             );
           }
   
-          console.log(`Raw API Response for page ${page}:`, response.data);
-  
           // Map the API response to the expected structure
           this.extensions = response.data.extensions || []
           this.totalPages = response.data.totalPages || 0;
@@ -159,8 +157,7 @@
               config
             );
           }
-  
-          console.log('Raw API Response (fetchExtension):', response.data);
+
   
           // Map the API response to the expected structure
           this.extensions = response.data.extensions || []
