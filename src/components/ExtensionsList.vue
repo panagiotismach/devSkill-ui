@@ -6,7 +6,13 @@
             <tr>
               <th>Extension</th>
               <th>Language</th>
-              <th>File Count</th>
+              <th>File Count
+                <font-awesome-icon
+                :icon="'sort'"
+                class="sort-icon"
+                @click="toggleSort('fileCount')"
+              />
+              </th>
               <th>Repositories Using
                 <font-awesome-icon
                 :icon="'sort'"
